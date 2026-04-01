@@ -1,0 +1,7 @@
+{
+  "universes": ["Alien"],
+  "capacity": {
+    "min": 4,
+    "max": 25
+  }
+}
