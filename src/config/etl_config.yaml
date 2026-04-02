@@ -1,0 +1,47 @@
+# ETL Configuration for COVID-19 Data Pipeline
+
+# Data Paths
+paths:
+  raw_data: raw/covid_19_data.csv
+  interim_data: data/interim/
+  processed_data: data/processed/
+  output_dir: outputs/
+
+# Processing Settings
+processing:
+  encoding: utf-8
+  date_format: '%m/%d/%Y'
+  chunk_size: 10000  # For large file processing
+
+# Validation Rules
+validation:
+  check_schema: true
+  check_nulls: true
+  check_negatives: true
+  min_confirmed_for_analysis: 100  # Minimum cases to include in some analyses
+
+# Data Cleaning
+cleaning:
+  fill_missing_province: "National"
+  remove_duplicates: true
+  normalize_countries: true
+
+# Derived Metrics
+metrics:
+  calculate_daily_new: true
+  calculate_active: true
+  calculate_cfr: true
+  calculate_recovery_rate: true
+
+# Output Formats
+output:
+  save_interim: true
+  formats:
+    - csv
+  compression: none  # Options: none, gzip, bz2
+
+# Logging
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  log_file: outputs/reports/etl_pipeline.log
+  console_output: true

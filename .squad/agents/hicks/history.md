@@ -120,3 +120,87 @@
 
 **Integration:** Tests validate framework and data integrity
 
+### 2026-04-02: ETL Pipeline OOP Refactor (SOLID Principles)
+
+**Task Completed**: Refactored the ETL pipeline from procedural functions to a clean OOP architecture following SOLID principles.
+
+**What I Created**:
+
+1. **Base Classes** (`etl/base/`):
+   - `BaseExtractor`: Abstract class for data extraction with extract() and validate() methods
+   - `BaseTransformer`: Abstract class for data transformation with transform() method
+   - `BaseLoader`: Abstract class for data loading with load() method
+
+2. **Concrete Extractors** (`etl/extractors/`):
+   - `CSVExtractor`: Extracts COVID-19 data from CSV files with validation
+
+3. **Concrete Transformers** (`etl/transformers/`):
+   - `DateTransformer`: Converts date columns to datetime format
+   - `MissingValueTransformer`: Handles missing values (fills Province/State with 'National')
+   - `AnomalyTransformer`: Fixes negative values and illogical data (Deaths+Recovered > Confirmed)
+   - `GeographyTransformer`: Standardizes country names (e.g., 'Mainland China' → 'China')
+   - `MetricsTransformer`: Creates derived metrics (Active, DeathRate, RecoveryRate, daily changes)
+   - `OutlierTransformer`: Detects and flags outliers using IQR method
+
+4. **Concrete Loaders** (`etl/loaders/`):
+   - `CSVLoader`: Saves full processed dataset
+   - `LatestSnapshotLoader`: Saves latest record per location
+   - `CountryAggregateLoader`: Aggregates provincial data to country level
+
+5. **Pipeline Orchestrator** (`etl/pipeline.py`):
+   - `ETLPipeline` class with dependency injection
+   - Chain of Responsibility pattern for transformers
+   - Strategy pattern for extractors/loaders
+
+6. **Updated Entry Point** (`etl/run_pipeline.py`):
+   - Factory function `create_pipeline()` for dependency injection
+   - Clear SOLID documentation and examples
+
+**SOLID Compliance**:
+- **S**ingle Responsibility: Each transformer handles ONE concern
+- **O**pen/Closed: New transformers extend base class, don't modify pipeline
+- **L**iskov Substitution: All transformers are interchangeable
+- **I**nterface Segregation: Small focused methods (extract, transform, load)
+- **D**ependency Inversion: Pipeline depends on abstractions, not concretions
+
+**Pipeline Run Results**:
+- Successfully processed 306,429 records
+- Applied 6 transformations in sequence
+- Fixed: 1 negative Confirmed, 2 negative Deaths, 3 negative Recovered
+- Fixed: 2,685 illogical records
+- Standardized: 49,180 country/region names
+- Flagged: 66,665 outliers
+- Generated 3 output files
+
+**File Structure**:
+```
+src/etl/
+├── base/
+│   ├── __init__.py
+│   ├── extractor.py
+│   ├── transformer.py
+│   └── loader.py
+├── extractors/
+│   ├── __init__.py
+│   └── csv_extractor.py
+├── transformers/
+│   ├── __init__.py
+│   ├── date_transformer.py
+│   ├── missing_value_transformer.py
+│   ├── anomaly_transformer.py
+│   ├── geography_transformer.py
+│   ├── metrics_transformer.py
+│   └── outlier_transformer.py
+├── loaders/
+│   ├── __init__.py
+│   └── csv_loader.py
+├── pipeline.py
+└── run_pipeline.py
+```
+
+**Key Design Decisions**:
+- Abstract base classes enable easy extension without modifying existing code
+- Transformer chain allows flexible ordering and easy addition of new transformers
+- Multiple loaders support different output formats from single pipeline run
+- Factory pattern in run_pipeline.py centralizes configuration
+
